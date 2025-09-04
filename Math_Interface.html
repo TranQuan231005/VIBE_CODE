@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidden Treasure</title>
+    <!-- Use Tailwind CSS for easy styling and responsiveness -->
+    <link rel="stylesheet" href="Style_math_interface.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gradient-to-br from-yellow-200 to-amber-300 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Game Container -->
+    <div id="game-container"
+        class="bg-white p-8 sm:p-12 md:p-16 rounded-3xl shadow-2xl max-w-4xl w-full text-center relative overflow-hidden">
+        <h1 id="game-title" class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-amber-800 mb-6 sm:mb-8">
+            Find the Hidden Treasure!
+        </h1>
+        <p class="text-xl sm:text-2xl text-amber-700 mb-8 sm:mb-12">Solve the puzzle to unlock a circle!</p>
+
+        <!-- Math Question Area -->
+        <div id="math-question" class="mb-8">
+            <div class="text-4xl sm:text-5xl font-bold text-gray-800 mb-4" id="question-text"></div>
+            <div class="flex flex-col items-center gap-4">
+                <input type="number" id="answer-input"
+                    class="w-2/3 sm:w-1/2 p-3 text-2xl text-center rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                    placeholder="Your Answer">
+                <button id="check-button"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
+                    Check
+                </button>
+            </div>
+        </div>
+
+        <!-- Container for the Circles -->
+        <div id="game-board" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 justify-items-center">
+            <!-- Ten "treasure points" represented as circles -->
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="1">1</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="2">2</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="3">3</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="4">4</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="5">5</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="6">6</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="7">7</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="8">8</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="9">9</div>
+            <div class="treasure-point bg-gray-400 rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold"
+                data-id="10">10</div>
+        </div>
+
+        <!-- Treasure Reveal Content -->
+        <div id="treasure-reveal"
+            class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-500 opacity-0">
+            <div class="relative w-48 h-48 sm:w-64 sm:h-64 mb-4">
+                <img src="https://placehold.co/256x256/FFD700/000?text=🏆" alt="Treasure"
+                    class="w-full h-full object-contain transform animate-bounce">
+            </div>
+            <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-yellow-600 animate-pulse">
+                You Found It!
+            </h2>
+            <p class="text-xl sm:text-2xl text-gray-700 mt-2">You have unlocked the next challenge!</p>
+            <button id="next-button"
+                class="mt-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
+                Next
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Message Box for Feedback -->
+    <div id="message-box" class="fixed inset-0 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
+            <p id="message-text" class="text-lg font-semibold text-gray-800"></p>
+            <button id="message-close-button"
+                class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const treasurePoints = document.querySelectorAll('.treasure-point');
+            const treasureReveal = document.getElementById('treasure-reveal');
+            const questionText = document.getElementById('question-text');
+            const answerInput = document.getElementById('answer-input');
+            const checkButton = document.getElementById('check-button');
+            const gameContainer = document.getElementById('game-container');
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            const messageCloseButton = document.getElementById('message-close-button');
+
+            let foundCount = 0;
+            const totalPoints = treasurePoints.length;
+            let currentQuestion = {};
+
+            // Function to show a custom message box
+            function showMessage(text) {
+                messageText.textContent = text;
+                messageBox.style.display = 'flex';
+            }
+
+            // Function to hide the custom message box
+            messageCloseButton.addEventListener('click', () => {
+                messageBox.style.display = 'none';
+            });
+
+            // Function to generate a new math question
+            function generateQuestion() {
+                const num1 = Math.floor(Math.random() * 5) + 1; // Numbers from 1-5
+                const num2 = Math.floor(Math.random() * 5) + 1;
+                const answer = num1 + num2;
+                currentQuestion = {
+                    text: `${num1} + ${num2} = ?`,
+                    answer: answer
+                };
+                questionText.textContent = currentQuestion.text;
+                answerInput.value = '';
+                answerInput.focus();
+            }
+
+            // Function to update the active treasure point
+            function updateActivePoint() {
+                // Deactivate the previous point if it exists
+                const previousPoint = document.querySelector('.treasure-point.active');
+                if (previousPoint) {
+                    previousPoint.classList.remove('active');
+                }
+
+                // Activate the next point in the sequence
+                if (foundCount < totalPoints) {
+                    const nextPoint = document.querySelector(`[data-id="${foundCount + 1}"]`);
+                    if (nextPoint) {
+                        nextPoint.classList.add('active');
+                        // Make it a different color to show it's active
+                        nextPoint.classList.remove('bg-gray-400');
+                        const colors = ['bg-green-500', 'bg-red-500', 'bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-teal-500', 'bg-pink-500', 'bg-lime-500', 'bg-cyan-500', 'bg-fuchsia-500'];
+                        nextPoint.classList.add(colors[foundCount]);
+                    }
+                }
+            }
+
+            // Check button click event handler
+            checkButton.addEventListener('click', () => {
+                const userAnswer = parseInt(answerInput.value, 10);
+                if (userAnswer === currentQuestion.answer) {
+                    // Correct answer
+                    showMessage("Great job! You unlocked a circle!");
+                    foundCount++;
+                    const activePoint = document.querySelector('.treasure-point.active');
+                    if (activePoint) {
+                        activePoint.classList.remove('active');
+                        activePoint.classList.add('found');
+                        activePoint.textContent = '✔️';
+                    }
+
+                    if (foundCount === totalPoints) {
+                        // All points found, reveal treasure
+                        setTimeout(() => {
+                            treasureReveal.classList.remove('hidden', 'opacity-0');
+                            treasureReveal.classList.add('flex', 'opacity-100');
+                        }, 500);
+                    } else {
+                        // Generate next question
+                        generateQuestion();
+                        updateActivePoint();
+                    }
+                } else {
+                    // Incorrect answer: play animation and show message
+                    gameContainer.classList.add('shake-animation');
+                    showMessage("Oops! That's not quite right. Try again!");
+                    setTimeout(() => {
+                        gameContainer.classList.remove('shake-animation');
+                    }, 500);
+                }
+            });
+
+            // Listen for clicks on the treasure points
+            treasurePoints.forEach(point => {
+                point.addEventListener('click', () => {
+                    if (point.classList.contains('active')) {
+                        // Do nothing, the check button handles the logic. This is for visual feedback.
+                    } else if (!point.classList.contains('found')) {
+                        showMessage("Solve the math problem first to unlock this circle!");
+                    }
+                });
+            });
+
+            // Initial game setup
+            generateQuestion();
+            updateActivePoint();
+        });
+    </script>
+</body>
+
+</html>

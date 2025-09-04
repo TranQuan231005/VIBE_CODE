@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Tiếng Việt Vui Nhộn</title>
+    <!-- Use Tailwind CSS for easy styling and responsiveness -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="Style_grammar_interface.css">
+
+</head>
+
+<body class="bg-gradient-to-br from-pink-300 to-purple-400 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Back Button -->
+    <button id="back-button"
+        class="absolute top-4 left-4 bg-white/70 backdrop-blur-sm rounded-full p-2 text-gray-800 shadow-md transition-transform hover:scale-110">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+    </button>
+
+    <!-- Game Container -->
+    <div id="game-container"
+        class="bg-white p-8 sm:p-12 md:p-16 rounded-3xl shadow-2xl max-w-4xl w-full text-center relative overflow-hidden">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-purple-800 mb-6 sm:mb-8">
+            Học Tiếng Việt Vui Nhộn
+        </h1>
+        <p class="text-xl sm:text-2xl text-purple-700 mb-8 sm:mb-12" id="question-text">
+            Hãy kéo từ vào đúng hình ảnh để học từ mới nhé!
+        </p>
+
+        <!-- Drag Item -->
+        <div id="drag-word"
+            class="drag-item bg-blue-400 hover:bg-blue-500 active:bg-blue-600 transition-all duration-300 transform rounded-2xl p-4 sm:p-6 mb-8 inline-block shadow-lg"
+            draggable="true">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white uppercase" id="word-text"></h2>
+        </div>
+
+        <!-- Drop Targets -->
+        <div id="drop-targets-container"
+            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 justify-items-center">
+            <!-- Drop targets will be dynamically generated here by JavaScript -->
+        </div>
+
+        <!-- Completion Message -->
+        <div id="completion-message"
+            class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-500 opacity-0">
+            <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-purple-600 animate-pulse">
+                Hoàn thành!
+            </h2>
+            <p class="text-xl sm:text-2xl text-gray-700 mt-2">Bạn đã hoàn thành tất cả các câu hỏi. Chúc mừng!</p>
+            <button id="restart-button"
+                class="mt-8 bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
+                Chơi Lại
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Message Box for Feedback -->
+    <div id="message-box" class="fixed inset-0 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
+            <p id="message-text" class="text-lg font-semibold text-gray-800"></p>
+            <button id="message-close-button"
+                class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dragItem = document.getElementById('drag-word');
+            const dropTargetsContainer = document.getElementById('drop-targets-container');
+            const wordText = document.getElementById('word-text');
+            const gameContainer = document.getElementById('game-container');
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            const messageCloseButton = document.getElementById('message-close-button');
+            const backButton = document.getElementById('back-button');
+            const completionMessage = document.getElementById('completion-message');
+            const restartButton = document.getElementById('restart-button');
+            const questionText = document.getElementById('question-text');
+
+            // Game data organized into questions
+            const questions = [
+                {
+                    correctWord: 'mèo',
+                    options: [
+                        { word: 'mèo', image: 'https://placehold.co/150x150/f0f0f0/333?text=Mèo' },
+                        { word: 'chó', image: 'https://placehold.co/150x150/f0f0f0/333?text=Chó' },
+                        { word: 'cá', image: 'https://placehold.co/150x150/f0f0f0/333?text=Cá' },
+                        { word: 'chim', image: 'https://placehold.co/150x150/f0f0f0/333?text=Chim' },
+                        { word: 'chuột', image: 'https://placehold.co/150x150/f0f0f0/333?text=Chuột' }
+                    ]
+                },
+                {
+                    correctWord: 'quả bóng',
+                    options: [
+                        { word: 'quả bóng', image: 'https://placehold.co/150x150/f0f0f0/333?text=Bóng' },
+                        { word: 'cái cây', image: 'https://placehold.co/150x150/f0f0f0/333?text=Cây' },
+                        { word: 'xe hơi', image: 'https://placehold.co/150x150/f0f0f0/333?text=Xe' },
+                        { word: 'cái ghế', image: 'https://placehold.co/150x150/f0f0f0/333?text=Ghế' },
+                        { word: 'bánh mì', image: 'https://placehold.co/150x150/f0f0f0/333?text=Bánh' }
+                    ]
+                },
+                {
+                    correctWord: 'mặt trời',
+                    options: [
+                        { word: 'mặt trăng', image: 'https://placehold.co/150x150/f0f0f0/333?text=Trăng' },
+                        { word: 'ngôi sao', image: 'https://placehold.co/150x150/f0f0f0/333?text=Sao' },
+                        { word: 'mặt trời', image: 'https://placehold.co/150x150/f0f0f0/333?text=Mặt+Trời' },
+                        { word: 'mây', image: 'https://placehold.co/150x150/f0f0f0/333?text=Mây' },
+                        { word: 'cầu vồng', image: 'https://placehold.co/150x150/f0f0f0/333?text=Cầu+Vồng' }
+                    ]
+                },
+                {
+                    correctWord: 'ngôi nhà',
+                    options: [
+                        { word: 'căn hộ', image: 'https://placehold.co/150x150/f0f0f0/333?text=Hộ' },
+                        { word: 'ngôi nhà', image: 'https://placehold.co/150x150/f0f0f0/333?text=Nhà' },
+                        { word: 'lều', image: 'https://placehold.co/150x150/f0f0f0/333?text=Lều' },
+                        { word: 'lâu đài', image: 'https://placehold.co/150x150/f0f0f0/333?text=Đài' },
+                        { word: 'cửa hàng', image: 'https://placehold.co/150x150/f0f0f0/333?text=Hàng' }
+                    ]
+                },
+                {
+                    correctWord: 'quyển sách',
+                    options: [
+                        { word: 'tạp chí', image: 'https://placehold.co/150x150/f0f0f0/333?text=Tạp+Chí' },
+                        { word: 'bút chì', image: 'https://placehold.co/150x150/f0f0f0/333?text=Bút+Chì' },
+                        { word: 'quyển sách', image: 'https://placehold.co/150x150/f0f0f0/333?text=Sách' },
+                        { word: 'bài báo', image: 'https://placehold.co/150x150/f0f0f0/333?text=Báo' },
+                        { word: 'tờ giấy', image: 'https://placehold.co/150x150/f0f0f0/333?text=Giấy' }
+                    ]
+                },
+                {
+                    correctWord: 'quả táo',
+                    options: [
+                        { word: 'quả chuối', image: 'https://placehold.co/150x150/f0f0f0/333?text=Chuối' },
+                        { word: 'quả cam', image: 'https://placehold.co/150x150/f0f0f0/333?text=Cam' },
+                        { word: 'quả táo', image: 'https://placehold.co/150x150/f0f0f0/333?text=Táo' },
+                        { word: 'quả dâu', image: 'https://placehold.co/150x150/f0f0f0/333?text=Dâu' },
+                        { word: 'quả nho', image: 'https://placehold.co/150x150/f0f0f0/333?text=Nho' }
+                    ]
+                },
+                {
+                    correctWord: 'xe đạp',
+                    options: [
+                        { word: 'xe đạp', image: 'https://placehold.co/150x150/f0f0f0/333?text=Xe+Đạp' },
+                        { word: 'xe máy', image: 'https://placehold.co/150x150/f0f0f0/333?text=Xe+Máy' },
+                        { word: 'ô tô', image: 'https://placehold.co/150x150/f0f0f0/333?text=Ô+Tô' },
+                        { word: 'máy bay', image: 'https://placehold.co/150x150/f0f0f0/333?text=Máy+Bay' },
+                        { word: 'tàu hỏa', image: 'https://placehold.co/150x150/f0f0f0/333?text=Tàu+Hỏa' }
+                    ]
+                },
+                {
+                    correctWord: 'cái ghế',
+                    options: [
+                        { word: 'cái bàn', image: 'https://placehold.co/150x150/f0f0f0/333?text=Bàn' },
+                        { word: 'cái ghế', image: 'https://placehold.co/150x150/f0f0f0/333?text=Ghế' },
+                        { word: 'giường', image: 'https://placehold.co/150x150/f0f0f0/333?text=Giường' },
+                        { word: 'tủ quần áo', image: 'https://placehold.co/150x150/f0f0f0/333?text=Tủ' },
+                        { word: 'đèn', image: 'https://placehold.co/150x150/f0f0f0/333?text=Đèn' }
+                    ]
+                },
+                {
+                    correctWord: 'bông hoa',
+                    options: [
+                        { word: 'bông hoa', image: 'https://placehold.co/150x150/f0f0f0/333?text=Hoa' },
+                        { word: 'cái lá', image: 'https://placehold.co/150x150/f0f0f0/333?text=Lá' },
+                        { word: 'cái cành', image: 'https://placehold.co/150x150/f0f0f0/333?text=Cành' },
+                        { word: 'củ khoai', image: 'https://placehold.co/150x150/f0f0f0/333?text=Khoai' },
+                        { word: 'bông lúa', image: 'https://placehold.co/150x150/f0f0f0/333?text=Lúa' }
+                    ]
+                },
+                {
+                    correctWord: 'con cá',
+                    options: [
+                        { word: 'con cá', image: 'https://placehold.co/150x150/f0f0f0/333?text=Cá' },
+                        { word: 'con ếch', image: 'https://placehold.co/150x150/f0f0f0/333?text=Ếch' },
+                        { word: 'con vịt', image: 'https://placehold.co/150x150/f0f0f0/333?text=Vịt' },
+                        { word: 'con gà', image: 'https://placehold.co/150x150/f0f0f0/333?text=Gà' },
+                        { word: 'con thỏ', image: 'https://placehold.co/150x150/f0f0f0/333?text=Thỏ' }
+                    ]
+                }
+            ];
+            let currentQuestionIndex = 0;
+
+            // Function to show a custom message box
+            function showMessage(text, isCorrect = false) {
+                messageText.textContent = text;
+                messageBox.style.display = 'flex';
+            }
+
+            messageCloseButton.addEventListener('click', () => {
+                messageBox.style.display = 'none';
+                if (wordText.textContent === '') {
+                    loadQuestion(currentQuestionIndex);
+                }
+            });
+
+            // Function to load a question based on the index
+            function loadQuestion(index) {
+                if (index >= questions.length) {
+                    showCompletionMessage();
+                    return;
+                }
+
+                const currentQuestion = questions[index];
+                wordText.textContent = currentQuestion.correctWord;
+                questionText.textContent = `Câu hỏi ${index + 1}/${questions.length}`;
+
+                // Make the drag item visible for the new question
+                dragItem.style.display = 'block';
+
+                // Clear previous drop targets
+                dropTargetsContainer.innerHTML = '';
+
+                // Dynamically create and add new drop targets
+                currentQuestion.options.forEach(option => {
+                    const dropTarget = document.createElement('div');
+                    dropTarget.className = 'drop-target bg-gray-200 rounded-2xl shadow-lg p-4 flex flex-col items-center justify-center';
+                    dropTarget.setAttribute('data-word', option.word);
+                    dropTarget.innerHTML = `<img src="${option.image}" alt="${option.word}" class="rounded-xl mb-2">`;
+                    dropTargetsContainer.appendChild(dropTarget);
+                });
+
+                // Re-attach event listeners to the new drop targets
+                addDropEventListeners();
+            }
+
+            // Re-attach event listeners to the drop targets
+            function addDropEventListeners() {
+                const newDropTargets = document.querySelectorAll('.drop-target');
+                newDropTargets.forEach(target => {
+                    target.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        target.classList.add('hovered');
+                    });
+
+                    target.addEventListener('dragleave', () => {
+                        target.classList.remove('hovered');
+                    });
+
+                    target.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        target.classList.remove('hovered');
+                        const droppedWord = target.getAttribute('data-word');
+                        const correctWord = questions[currentQuestionIndex].correctWord;
+
+                        if (droppedWord === correctWord) {
+                            showMessage("Đúng rồi! Bạn đã tìm thấy cặp đôi!", true);
+                            target.classList.add('correct-answer');
+                            dragItem.style.display = 'none';
+                            wordText.textContent = '';
+                            setTimeout(() => {
+                                currentQuestionIndex++;
+                                loadQuestion(currentQuestionIndex);
+                            }, 1000);
+                        } else {
+                            gameContainer.classList.add('shake-animation');
+                            setTimeout(() => {
+                                gameContainer.classList.remove('shake-animation');
+                            }, 500);
+                            showMessage("Chưa đúng! Thử lại nhé.");
+                        }
+                    });
+                });
+            }
+
+            function showCompletionMessage() {
+                completionMessage.classList.remove('hidden', 'opacity-0');
+                completionMessage.classList.add('flex', 'opacity-100');
+            }
+
+            restartButton.addEventListener('click', () => {
+                currentQuestionIndex = 0;
+                completionMessage.classList.remove('flex', 'opacity-100');
+                completionMessage.classList.add('hidden', 'opacity-0');
+                loadQuestion(currentQuestionIndex);
+            });
+
+            // Back button functionality
+            backButton.addEventListener('click', () => {
+                window.location.href = 'index.html'; // Navigate back to the main menu
+            });
+
+            // Start the game on page load
+            loadQuestion(currentQuestionIndex);
+        });
+    </script>
+</body>
+
+</html>

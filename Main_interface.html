@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids' Learning Corner</title>
+    <!-- Use Tailwind CSS for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-300 to-purple-400 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div class="bg-white p-8 sm:p-12 md:p-16 rounded-3xl shadow-2xl max-w-4xl w-full text-center">
+        <!-- Game Title -->
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-800 mb-8 sm:mb-12">
+            Fun Learning Adventure!
+        </h1>
+
+        <!-- Module Selection Buttons -->
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-8">
+
+            <!-- Math Module Button -->
+            <button id="math-button"
+                class="group relative bg-green-500 hover:bg-green-600 active:bg-green-700 transition-all duration-300 transform hover:scale-105 active:scale-95 text-white font-bold py-6 px-12 rounded-2xl shadow-lg w-full sm:w-1/2 md:w-56 text-2xl sm:text-3xl">
+                <span
+                    class="absolute top-0 left-0 -mt-2 -ml-2 w-full h-full bg-green-700 rounded-2xl -z-10 transition-all duration-300 group-hover:scale-110 group-active:scale-95"></span>
+                <span class="relative z-10 flex flex-col items-center">
+                    <span class="text-5xl mb-2">🔢</span>
+                    Math
+                </span>
+            </button>
+
+            <!-- Grammar Module Button -->
+            <button id="grammar-button"
+                class="group relative bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-300 transform hover:scale-105 active:scale-95 text-white font-bold py-6 px-12 rounded-2xl shadow-lg w-full sm:w-1/2 md:w-56 text-2xl sm:text-3xl">
+                <span
+                    class="absolute top-0 left-0 -mt-2 -ml-2 w-full h-full bg-yellow-700 rounded-2xl -z-10 transition-all duration-300 group-hover:scale-110 group-active:scale-95"></span>
+                <span class="relative z-10 flex flex-col items-center">
+                    <span class="text-5xl mb-2">📚</span>
+                    Grammar
+                </span>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- JavaScript for Button Clicks -->
+    <script src="Click_on_from_main_interface.js"></script>
+
+</body>
+
+</html>
