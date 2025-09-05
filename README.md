@@ -11,16 +11,14 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
-
-        h1 {
+         h1 {
             text-align: center;
             color: red;
             font-size: 50px;
             font-family: 'Times New Roman', Times, serif;
             text-shadow: 2px 2px 5px yellow;
         }
-
-        button {
+         button {
             display: block;
             margin: 0 auto;
             padding: 10px 20px;
@@ -36,10 +34,10 @@
 
 <body id="body">
     <header>
-        <h1 style="margin-top;">TRUY TÌM KHO BÁU</h1>
+        <h1 id="h1">TRUY TÌM KHO BÁU</h1>
     </header>
     <main>
-        <button><a href="Main_interface.html"></a>Click on</button>
+        <button id="button"><a href="Main_interface.html"></a>Click on</button>
     </main>
 </body>
 
